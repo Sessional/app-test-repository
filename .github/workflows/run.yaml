@@ -1,0 +1,28 @@
+name: run
+on:
+  - pull_request
+jobs:
+  pre-do-something:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo '### Hello world! :rocket:' >> $GITHUB_STEP_SUMMARY
+
+  do-something:
+    runs-on: ubuntu-latest
+    environment: production
+    needs: pre-do-something
+    permissions:
+      contents: read
+      actions: write
+    steps:
+    - run: echo "woo!"
+    - run: echo ${{ github.action_repository }}
+    - run: echo ${{ github.action_ref }}
+    - run: echo ${{ github.run_id }}
+    - run: echo '### Hello world! :rocket:' >> $GITHUB_STEP_SUMMARY
+    - run: |
+        curl --request GET \
+        --url https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/approvals \
+        --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+        --header 'content-type: application/json' \
+        --fail
